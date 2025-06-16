@@ -58,8 +58,6 @@
 <h4>📝 Observações</h4>
 <ul>
   <li>Prazo do desafio: 1 semana.</li>
-  <li>Entrega via Git (preferencialmente GitHub).</li>
-  <li>Testes unitários são considerados um diferencial.</li>
 </ul>
 
 <h1>Meu Projeto</h1>
