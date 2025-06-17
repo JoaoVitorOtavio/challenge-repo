@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -93,6 +94,10 @@ export class UsersService {
 
       return result;
     } catch (error: any) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       if (typeof error === 'object' && error !== null) {
         const err = error as {
           code?: string;
@@ -152,10 +157,8 @@ export class UsersService {
 
       return;
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(
-          error?.message || 'Erro ao atualizar senha',
-        );
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new BadRequestException('Erro ao atualizar senha');
@@ -189,10 +192,8 @@ export class UsersService {
 
       return result;
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(
-          error?.message || 'Erro ao buscar usuário',
-        );
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new BadRequestException('Erro ao buscar usuário');
@@ -209,10 +210,8 @@ export class UsersService {
 
       return user;
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(
-          error?.message || 'Erro ao buscar usuário por e-mail',
-        );
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new BadRequestException('Erro ao buscar usuário por e-mail');
@@ -222,17 +221,13 @@ export class UsersService {
   async remove(id: number): Promise<void> {
     try {
       const user = await this.usersRepo.findOneBy({ id });
-
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
-
       await this.usersRepo.delete(id);
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(
-          error?.message || 'Erro ao deletar usuário',
-        );
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new BadRequestException('Erro ao deletar usuário');
