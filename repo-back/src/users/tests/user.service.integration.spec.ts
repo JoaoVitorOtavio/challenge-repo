@@ -33,6 +33,13 @@ export async function createTestingModule() {
 }
 
 describe('UserService - integration', () => {
+  const MOCK_CREATE_USER_DTO = {
+    name: 'test',
+    role: UserRole.USER,
+    email: 'joao@email.com',
+    password: '123',
+  };
+
   let app: TestingModule;
   let userService: UsersService;
   let userRepository: Repository<Users>;
@@ -53,27 +60,25 @@ describe('UserService - integration', () => {
   });
 
   it('Should create an user', async () => {
-    const dto = {
-      name: 'test',
-      role: UserRole.USER,
-      email: 'joao@email.com',
-      password: '123',
-    };
+    const createdUser = await userService.create(MOCK_CREATE_USER_DTO);
 
-    const createdUser = await userService.create(dto);
+    const userInDb = await userRepository.findOneBy({
+      email: MOCK_CREATE_USER_DTO.email,
+    });
 
-    const userInDb = await userRepository.findOneBy({ email: dto.email });
-
-    const isMatch = await bcrypt.compare(dto.password, createdUser.password);
+    const isMatch = await bcrypt.compare(
+      MOCK_CREATE_USER_DTO.password,
+      createdUser.password,
+    );
     expect(isMatch).toBe(true);
 
     expect(createdUser).toBeDefined();
     expect(createdUser).toHaveProperty('id');
-    expect(createdUser.email).toBe(dto.email);
-    expect(createdUser.password).not.toEqual(dto.password);
+    expect(createdUser.email).toBe(MOCK_CREATE_USER_DTO.email);
+    expect(createdUser.password).not.toEqual(MOCK_CREATE_USER_DTO.password);
 
     expect(userInDb).toBeDefined();
-    expect(userInDb?.password).not.toBe(dto.password);
-    expect(userInDb?.email).toEqual(dto.email);
+    expect(userInDb?.password).not.toBe(MOCK_CREATE_USER_DTO.password);
+    expect(userInDb?.email).toEqual(MOCK_CREATE_USER_DTO.email);
   });
 });
