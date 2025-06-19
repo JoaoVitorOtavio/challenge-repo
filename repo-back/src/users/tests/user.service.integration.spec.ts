@@ -98,4 +98,30 @@ describe('UserService - integration', () => {
     expect(usersOnDb).toHaveLength(1);
     expect(usersOnDb[0].email).toBe(MOCK_CREATE_USER_DTO.email);
   });
+
+  it('Should be possible to create an user without pass role property', async () => {
+    const createdUser = await userService.create({
+      ...MOCK_CREATE_USER_DTO,
+      role: undefined,
+    });
+
+    const userInDb = await userRepository.findOneBy({
+      email: MOCK_CREATE_USER_DTO.email,
+    });
+
+    const passwordIsMatched = await bcrypt.compare(
+      MOCK_CREATE_USER_DTO.password,
+      createdUser.password,
+    );
+    expect(passwordIsMatched).toBe(true);
+
+    expect(createdUser).toBeDefined();
+    expect(createdUser).toHaveProperty('id');
+    expect(createdUser.email).toBe(MOCK_CREATE_USER_DTO.email);
+    expect(createdUser.password).not.toEqual(MOCK_CREATE_USER_DTO.password);
+
+    expect(userInDb).toBeDefined();
+    expect(userInDb?.password).not.toBe(MOCK_CREATE_USER_DTO.password);
+    expect(userInDb?.email).toEqual(MOCK_CREATE_USER_DTO.email);
+  });
 });
