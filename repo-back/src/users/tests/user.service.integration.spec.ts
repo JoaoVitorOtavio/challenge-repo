@@ -6,7 +6,7 @@ import { UsersService } from '../users.service';
 import { UserRole } from '../users.enums';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { expectToThrow } from 'src/helpers/test-exception';
 import { createUser } from 'src/helpers/test-create-user';
 
@@ -153,5 +153,16 @@ describe('UserService - integration', () => {
       userInDb!.password,
     );
     expect(passwordIsMatched).toBe(true);
+  });
+
+  it('Should throw NotFoundException when user not found', async () => {
+    await expectToThrow({
+      fn: () => userService.update(1, { name: 'fake name' }),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+
+    const users = await userRepository.find();
+    expect(users).toHaveLength(0);
   });
 });
