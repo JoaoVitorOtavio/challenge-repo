@@ -116,13 +116,15 @@ export class UsersService {
         }
 
         if ('message' in err && typeof err.message === 'string') {
-          throw new BadRequestException(err.message || 'Erro ao criar usuário');
+          throw new BadRequestException(
+            err.message || 'Erro ao atualizar usuário',
+          );
         }
       }
 
       if (error instanceof Error) {
         throw new BadRequestException(
-          error?.message || 'Erro ao criar usuário',
+          error?.message || 'Erro ao atualizar usuário',
         );
       }
 
