@@ -88,5 +88,5 @@ export class createUserDTO {
     message: 'role deve ser admin, user ou internal',
   })
   @IsOptional() // é opicional pq tem default pra cadastrar no banco
-  role: UserRole;
+  role?: UserRole;
 }
