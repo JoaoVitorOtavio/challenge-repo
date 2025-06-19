@@ -155,7 +155,7 @@ describe('UserService - integration', () => {
     expect(passwordIsMatched).toBe(true);
   });
 
-  it('Should throw NotFoundException when user not found', async () => {
+  it('Should throw NotFoundException when user not found on update', async () => {
     await expectToThrow({
       fn: () => userService.update(1, { name: 'fake name' }),
       expectedException: NotFoundException,
@@ -166,7 +166,7 @@ describe('UserService - integration', () => {
     expect(users).toHaveLength(0);
   });
 
-  it('Should throw BadRequestException when try to update to an existed email', async () => {
+  it('Should throw BadRequestException when try to update to an existed email on update', async () => {
     const MOCK_USER_EMAIL = 'fake2@mail.com';
 
     const firstUserInDb = await createUser(userService);
@@ -196,5 +196,28 @@ describe('UserService - integration', () => {
 
     const allUsers = await userRepository.find();
     expect(allUsers).toHaveLength(2);
+  });
+
+  it('Should throw BadRequestException when try to update an user and pass nothing on update', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toHaveProperty('id');
+
+    await expectToThrow({
+      fn: () => userService.update(createdUser.id, {}),
+      expectedException: BadRequestException,
+      expectedMessage:
+        'É necessário informar ao menos um campo para atualizar.',
+    });
+
+    const userInDb = await userRepository.findOneBy({
+      id: createdUser.id,
+    });
+
+    expect(userInDb).toBeDefined();
+    expect(userInDb!.email).toBe(createdUser.email);
+    expect(userInDb!.name).toBe(createdUser.name);
+
+    const usersInDb = await userRepository.find();
+    expect(usersInDb).toHaveLength(1);
   });
 });
