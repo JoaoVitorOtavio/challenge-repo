@@ -38,7 +38,7 @@ export async function createTestingModule() {
 export const MOCK_CREATE_USER_DTO = {
   name: 'test',
   role: UserRole.USER,
-  email: 'joao@email.com',
+  email: 'fake@email.com',
   password: '123',
 };
 
@@ -164,5 +164,37 @@ describe('UserService - integration', () => {
 
     const users = await userRepository.find();
     expect(users).toHaveLength(0);
+  });
+
+  it('Should throw BadRequestException when try to update to an existed email', async () => {
+    const MOCK_USER_EMAIL = 'fake2@mail.com';
+
+    const firstUserInDb = await createUser(userService);
+    expect(firstUserInDb).toBeDefined();
+    expect(firstUserInDb.email).toBe(MOCK_CREATE_USER_DTO.email);
+
+    const createdUser = await createUser(userService, {
+      email: MOCK_USER_EMAIL,
+    });
+    expect(createdUser).toHaveProperty('id');
+
+    await expectToThrow({
+      fn: () =>
+        userService.update(createdUser.id, {
+          email: MOCK_CREATE_USER_DTO.email,
+        }),
+      expectedException: BadRequestException,
+      expectedMessage: 'Já existe um usuário com esse e-mail',
+    });
+
+    const userInDb = await userRepository.findOneBy({
+      id: createdUser.id,
+    });
+
+    expect(userInDb).toBeDefined();
+    expect(userInDb!.email).toBe(createdUser.email);
+
+    const allUsers = await userRepository.find();
+    expect(allUsers).toHaveLength(2);
   });
 });
