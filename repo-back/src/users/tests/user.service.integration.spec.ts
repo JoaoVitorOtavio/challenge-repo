@@ -8,6 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BadRequestException } from '@nestjs/common';
 import { expectToThrow } from 'src/helpers/test-exception';
+import { createUser } from 'src/helpers/test-create-user';
 
 export async function createTestingModule() {
   if (process.env.DB_NAME !== 'challenge-repo-test-db') {
@@ -34,14 +35,14 @@ export async function createTestingModule() {
   }).compile();
 }
 
-describe('UserService - integration', () => {
-  const MOCK_CREATE_USER_DTO = {
-    name: 'test',
-    role: UserRole.USER,
-    email: 'joao@email.com',
-    password: '123',
-  };
+export const MOCK_CREATE_USER_DTO = {
+  name: 'test',
+  role: UserRole.USER,
+  email: 'joao@email.com',
+  password: '123',
+};
 
+describe('UserService - integration', () => {
   let app: TestingModule;
   let userService: UsersService;
   let userRepository: Repository<Users>;
@@ -123,5 +124,34 @@ describe('UserService - integration', () => {
     expect(userInDb).toBeDefined();
     expect(userInDb?.password).not.toBe(MOCK_CREATE_USER_DTO.password);
     expect(userInDb?.email).toEqual(MOCK_CREATE_USER_DTO.email);
+  });
+
+  it('Should update an user properly', async () => {
+    const MOCK_NEW_NAME = 'fake update name';
+    const MOCK_NEW_PASSWORD = 'fake update password';
+
+    const createdUser = await createUser(userService);
+    expect(createdUser).toHaveProperty('id');
+
+    const updatedUser = await userService.update(createdUser.id, {
+      name: MOCK_NEW_NAME,
+      password: MOCK_NEW_PASSWORD,
+    });
+    expect(createdUser.name).not.toEqual(updatedUser.name);
+    expect(updatedUser.name).toEqual(MOCK_NEW_NAME);
+    expect(updatedUser.id).toEqual(createdUser.id);
+    expect(updatedUser).not.toHaveProperty('password');
+
+    const userInDb = await userRepository.findOneBy({
+      id: updatedUser.id,
+    });
+    expect(userInDb).toBeDefined();
+    expect(userInDb!.email).toBe(createdUser.email);
+
+    const passwordIsMatched = await bcrypt.compare(
+      MOCK_NEW_PASSWORD,
+      userInDb!.password,
+    );
+    expect(passwordIsMatched).toBe(true);
   });
 });
