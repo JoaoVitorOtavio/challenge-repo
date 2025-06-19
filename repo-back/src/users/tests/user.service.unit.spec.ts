@@ -113,11 +113,11 @@ describe('UserService', () => {
   it("Should return notFoundException when user doesn't exist on remove", async () => {
     mockUsersRepo.findOneBy.mockResolvedValueOnce(undefined);
 
-    await expectToThrow(
-      () => usersService.remove(1),
-      NotFoundException,
-      'Usuário não encontrado',
-    );
+    await expectToThrow({
+      fn: () => usersService.remove(1),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
 
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledWith({ id: 1 });
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledTimes(1);
@@ -163,12 +163,12 @@ describe('UserService', () => {
   it('Should throw notFoundException when user doesnt exist on find user by email', async () => {
     mockUsersRepo.findOneBy.mockResolvedValueOnce(undefined);
 
-    await expectToThrow(
-      () => usersService.findOneByEmail(MOCK_EMAIL),
-      NotFoundException,
-      'Usuário não encontrado',
-      true,
-    );
+    await expectToThrow({
+      fn: () => usersService.findOneByEmail(MOCK_EMAIL),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+      shouldForceFail: true,
+    });
 
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledTimes(1);
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledWith({ email: MOCK_EMAIL });
@@ -201,12 +201,12 @@ describe('UserService', () => {
   it('Should throw notFoundException when user doesnt exist on find user by id', async () => {
     mockUsersRepo.findOneBy.mockResolvedValueOnce(undefined);
 
-    await expectToThrow(
-      () => usersService.findOne(MOCK_RESULT.id),
-      NotFoundException,
-      'Usuário não encontrado',
-      true,
-    );
+    await expectToThrow({
+      fn: () => usersService.findOne(MOCK_RESULT.id),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+      shouldForceFail: true,
+    });
 
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledTimes(1);
     expect(mockUsersRepo.findOneBy).toHaveBeenCalledWith({
@@ -233,11 +233,11 @@ describe('UserService', () => {
 
     const { id, newPassword, currentPassword } = MOCK_UPDATE_PASSWORD_BODY;
 
-    await expectToThrow(
-      () => usersService.updatePassword(id, newPassword, currentPassword),
-      BadRequestException,
-      'Senha atual incorreta',
-    );
+    await expectToThrow({
+      fn: () => usersService.updatePassword(id, newPassword, currentPassword),
+      expectedException: BadRequestException,
+      expectedMessage: 'Senha atual incorreta',
+    });
 
     expect(mockUsersRepo.findOne).toHaveBeenCalledTimes(1);
     expect(mockUsersRepo.findOne).toHaveBeenCalledWith({
@@ -256,12 +256,12 @@ describe('UserService', () => {
 
     const { id, newPassword, currentPassword } = MOCK_UPDATE_PASSWORD_BODY;
 
-    await expectToThrow(
-      () => usersService.updatePassword(id, newPassword, currentPassword),
-      NotFoundException,
-      'Usuário não encontrado',
-      true,
-    );
+    await expectToThrow({
+      fn: () => usersService.updatePassword(id, newPassword, currentPassword),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+      shouldForceFail: true,
+    });
 
     expect(bcrypt.compare).not.toHaveBeenCalled();
     expect(mockUsersRepo.update).not.toHaveBeenCalled();
@@ -313,11 +313,11 @@ describe('UserService', () => {
     mockBcrypt.genSalt.mockResolvedValueOnce(MOCK_SALT);
     mockBcrypt.hash.mockResolvedValueOnce(MOCK_HASH_PASSWORD);
 
-    await expectToThrow(
-      () => usersService.update(MOCK_RESULT.id, MOCK_UPDATE_USER_BODY),
-      BadRequestException,
-      'Já existe um usuário com esse e-mail',
-    );
+    await expectToThrow({
+      fn: () => usersService.update(MOCK_RESULT.id, MOCK_UPDATE_USER_BODY),
+      expectedException: BadRequestException,
+      expectedMessage: 'Já existe um usuário com esse e-mail',
+    });
 
     expect(bcrypt.genSalt).toHaveBeenCalledTimes(1);
     expect(bcrypt.genSalt).toHaveBeenCalledWith(10);
@@ -338,11 +338,11 @@ describe('UserService', () => {
   it('Should return NotFoundException when user is not found on update', async () => {
     mockUsersRepo.findOne.mockResolvedValueOnce(null);
 
-    await expectToThrow(
-      () => usersService.update(MOCK_RESULT.id, MOCK_UPDATE_USER_BODY),
-      NotFoundException,
-      'Usuário não encontrado',
-    );
+    await expectToThrow({
+      fn: () => usersService.update(MOCK_RESULT.id, MOCK_UPDATE_USER_BODY),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
 
     expect(mockUsersRepo.findOne).toHaveBeenCalledTimes(1);
     expect(mockUsersRepo.update).not.toHaveBeenCalled();
@@ -429,11 +429,11 @@ describe('UserService', () => {
     });
     mockUsersRepo.save.mockRejectedValueOnce(error);
 
-    await expectToThrow(
-      () => usersService.create(MOCK_UPDATE_USER_BODY),
-      BadRequestException,
-      'Já existe um usuário com esse e-mail',
-    );
+    await expectToThrow({
+      fn: () => usersService.create(MOCK_UPDATE_USER_BODY),
+      expectedException: BadRequestException,
+      expectedMessage: 'Já existe um usuário com esse e-mail',
+    });
 
     expect(mockBcrypt.genSalt).toHaveBeenCalledTimes(1);
     expect(mockBcrypt.genSalt).toHaveBeenCalledWith(10);
@@ -463,12 +463,12 @@ describe('UserService', () => {
     });
     mockUsersRepo.save.mockRejectedValueOnce(new BadRequestException());
 
-    await expectToThrow(
-      () => usersService.create(MOCK_UPDATE_USER_BODY),
-      BadRequestException,
-      'Bad Request',
-      true,
-    );
+    await expectToThrow({
+      fn: () => usersService.create(MOCK_UPDATE_USER_BODY),
+      expectedException: BadRequestException,
+      expectedMessage: 'Bad Request',
+      shouldForceFail: true,
+    });
 
     expect(mockBcrypt.genSalt).toHaveBeenCalledTimes(1);
     expect(mockBcrypt.genSalt).toHaveBeenCalledWith(10);
@@ -487,8 +487,6 @@ describe('UserService', () => {
   });
 
   it('Should create user correctly', async () => {
-    const CLONE_MOCK_PASSWORD = MOCK_UPDATE_USER_BODY.password;
-
     mockBcrypt.genSalt.mockResolvedValueOnce(MOCK_SALT);
     mockBcrypt.hash.mockResolvedValueOnce(MOCK_HASH_PASSWORD);
 
@@ -515,7 +513,7 @@ describe('UserService', () => {
     expect(mockUsersRepo.create).toHaveBeenCalledTimes(1);
     expect(mockUsersRepo.create).toHaveBeenCalledWith({
       ...MOCK_UPDATE_USER_BODY,
-      password: CLONE_MOCK_PASSWORD,
+      password: MOCK_HASH_PASSWORD,
     });
 
     expect(mockUsersRepo.save).toHaveBeenCalledTimes(1);
@@ -526,7 +524,7 @@ describe('UserService', () => {
 
     expect(result).toEqual({
       ...MOCK_UPDATE_USER_BODY,
-      password: CLONE_MOCK_PASSWORD,
+      password: MOCK_HASH_PASSWORD,
     });
   });
 });
