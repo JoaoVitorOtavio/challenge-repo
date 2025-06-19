@@ -353,6 +353,20 @@ describe('UserService', () => {
     });
   });
 
+  it('Should return BadRequestException when doesnt pass nothing to update', async () => {
+    await expectToThrow({
+      fn: () => usersService.update(MOCK_RESULT.id, {}),
+      expectedException: BadRequestException,
+      expectedMessage:
+        'É necessário informar ao menos um campo para atualizar.',
+    });
+
+    expect(mockUsersRepo.findOne).not.toHaveBeenCalled();
+    expect(mockUsersRepo.update).not.toHaveBeenCalled();
+    expect(bcrypt.genSalt).not.toHaveBeenCalled();
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+  });
+
   it('Should update user correctly', async () => {
     mockUsersRepo.findOne.mockResolvedValueOnce(MOCK_RESULT);
     mockBcrypt.genSalt.mockResolvedValueOnce(MOCK_SALT);
