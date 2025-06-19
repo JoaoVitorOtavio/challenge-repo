@@ -62,6 +62,12 @@ export class UsersService {
 
   async update(id: number, updateData: updateUserDTO): Promise<Partial<Users>> {
     try {
+      if (Object.keys(updateData).length === 0) {
+        throw new BadRequestException(
+          'É necessário informar ao menos um campo para atualizar.',
+        );
+      }
+
       const user: Users | null = await this.usersRepo.findOne({
         where: { id },
       });
