@@ -6,6 +6,8 @@ import { UsersService } from '../users.service';
 import { UserRole } from '../users.enums';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { BadRequestException } from '@nestjs/common';
+import { expectToThrow } from 'src/helpers/test-exception';
 
 export async function createTestingModule() {
   if (process.env.DB_NAME !== 'challenge-repo-test-db') {
@@ -45,7 +47,7 @@ describe('UserService - integration', () => {
   let userRepository: Repository<Users>;
   let dataSource: DataSource;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     app = await createTestingModule();
     userService = app.get<UsersService>(UsersService);
     userRepository = app.get<Repository<Users>>(getRepositoryToken(Users));
@@ -53,7 +55,7 @@ describe('UserService - integration', () => {
     dataSource = app.get(DataSource);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await dataSource.dropDatabase();
     await dataSource.destroy();
     await app.close();
@@ -66,11 +68,11 @@ describe('UserService - integration', () => {
       email: MOCK_CREATE_USER_DTO.email,
     });
 
-    const isMatch = await bcrypt.compare(
+    const passwordIsMatched = await bcrypt.compare(
       MOCK_CREATE_USER_DTO.password,
       createdUser.password,
     );
-    expect(isMatch).toBe(true);
+    expect(passwordIsMatched).toBe(true);
 
     expect(createdUser).toBeDefined();
     expect(createdUser).toHaveProperty('id');
@@ -80,5 +82,20 @@ describe('UserService - integration', () => {
     expect(userInDb).toBeDefined();
     expect(userInDb?.password).not.toBe(MOCK_CREATE_USER_DTO.password);
     expect(userInDb?.email).toEqual(MOCK_CREATE_USER_DTO.email);
+  });
+
+  it('Should thrown BadRequestException when there is an user with same email', async () => {
+    await userService.create(MOCK_CREATE_USER_DTO);
+
+    await expectToThrow({
+      fn: () => userService.create(MOCK_CREATE_USER_DTO),
+      expectedException: BadRequestException,
+      expectedMessage: 'Já existe um usuário com esse e-mail',
+      expectStatus: 400,
+    });
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toHaveLength(1);
+    expect(usersOnDb[0].email).toBe(MOCK_CREATE_USER_DTO.email);
   });
 });
