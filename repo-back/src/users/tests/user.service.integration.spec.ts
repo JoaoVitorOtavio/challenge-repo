@@ -283,4 +283,35 @@ describe('UserService - integration', () => {
     const usersOnDb = await userRepository.find();
     expect(usersOnDb).toHaveLength(1);
   });
+
+  it('Should return BadRequestException when passwords does not match on update password', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toHaveProperty('id');
+
+    await expectToThrow({
+      fn: () =>
+        userService.updatePassword(
+          createdUser.id,
+          'NEW_PASSWORD',
+          'wrong password',
+        ),
+      expectedException: BadRequestException,
+      expectedMessage: 'Senha atual incorreta',
+    });
+
+    const userOnDb = await userRepository.findOneBy({ id: createdUser.id });
+
+    expect(userOnDb).toBeDefined();
+    expect(userOnDb?.email).toEqual(MOCK_CREATE_USER_DTO.email);
+    expect(userOnDb?.name).toEqual(MOCK_CREATE_USER_DTO.name);
+
+    const passwordIsMatched = await bcrypt.compare(
+      MOCK_CREATE_USER_DTO.password,
+      userOnDb!.password,
+    );
+    expect(passwordIsMatched).toBe(true);
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toHaveLength(1);
+  });
 });
