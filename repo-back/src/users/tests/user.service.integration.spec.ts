@@ -314,4 +314,29 @@ describe('UserService - integration', () => {
     const usersOnDb = await userRepository.find();
     expect(usersOnDb).toHaveLength(1);
   });
+
+  it('Should return all users on findAll', async () => {
+    for (let i = 0; i < 3; i++) {
+      await createUser(userService, {
+        email: `teste${i}@mail.com`,
+      });
+    }
+
+    const users = await userService.findAll();
+    expect(users).toBeDefined();
+    expect(users).toHaveLength(3);
+
+    const emails = users.map((user) => user.email);
+    expect(emails).toEqual(
+      expect.arrayContaining([
+        'teste0@mail.com',
+        'teste1@mail.com',
+        'teste2@mail.com',
+      ]),
+    );
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toBeDefined();
+    expect(usersOnDb).toHaveLength(3);
+  });
 });
