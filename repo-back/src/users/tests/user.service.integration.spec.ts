@@ -220,4 +220,39 @@ describe('UserService - integration', () => {
     const usersInDb = await userRepository.find();
     expect(usersInDb).toHaveLength(1);
   });
+
+  it('Should update password correctly', async () => {
+    const NEW_PASSWORD = 'newpassword';
+
+    const createdUser = await createUser(userService);
+    expect(createdUser).toHaveProperty('id');
+
+    const passwordIsMatchedOnCreated = await bcrypt.compare(
+      MOCK_CREATE_USER_DTO.password,
+      createdUser.password,
+    );
+    expect(passwordIsMatchedOnCreated).toBe(true);
+
+    await userService.updatePassword(
+      createdUser.id,
+      NEW_PASSWORD,
+      MOCK_CREATE_USER_DTO.password,
+    );
+
+    const userInDb = await userRepository.findOneBy({
+      id: createdUser.id,
+    });
+    expect(userInDb).toBeDefined();
+    expect(userInDb!.email).toBe(createdUser.email);
+    expect(userInDb!.name).toBe(createdUser.name);
+
+    const passwordIsMatchedOnUpdated = await bcrypt.compare(
+      NEW_PASSWORD,
+      userInDb!.password,
+    );
+    expect(passwordIsMatchedOnUpdated).toBe(true);
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toHaveLength(1);
+  });
 });
