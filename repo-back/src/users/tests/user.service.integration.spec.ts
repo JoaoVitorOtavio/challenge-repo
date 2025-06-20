@@ -255,4 +255,32 @@ describe('UserService - integration', () => {
     const usersOnDb = await userRepository.find();
     expect(usersOnDb).toHaveLength(1);
   });
+
+  it('Should return BadRequestException when user is not found on updatePassword', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toHaveProperty('id');
+
+    await expectToThrow({
+      fn: () =>
+        userService.updatePassword(
+          createdUser.id + 1,
+          'NEW_PASSWORD',
+          MOCK_CREATE_USER_DTO.password,
+        ),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+
+    expect(createdUser.email).toEqual(MOCK_CREATE_USER_DTO.email);
+    expect(createdUser.name).toEqual(MOCK_CREATE_USER_DTO.name);
+
+    const passwordIsMatched = await bcrypt.compare(
+      MOCK_CREATE_USER_DTO.password,
+      createdUser.password,
+    );
+    expect(passwordIsMatched).toBe(true);
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toHaveLength(1);
+  });
 });
