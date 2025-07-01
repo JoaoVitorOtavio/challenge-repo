@@ -339,4 +339,20 @@ describe('UserService - integration', () => {
     expect(usersOnDb).toBeDefined();
     expect(usersOnDb).toHaveLength(3);
   });
+
+  it('Should find One User', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toBeDefined();
+
+    const foundUser = await userService.findOne(createdUser.id);
+
+    expect(foundUser).toBeDefined();
+    expect(createdUser.email).toEqual(foundUser?.email);
+    expect(createdUser.name).toEqual(foundUser?.name);
+    expect(foundUser?.password).toBeUndefined();
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toBeDefined();
+    expect(usersOnDb).toHaveLength(1);
+  });
 });
