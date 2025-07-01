@@ -363,4 +363,19 @@ describe('UserService - integration', () => {
       expectedMessage: 'Usuário não encontrado',
     });
   });
+
+  it('Should find one user by email', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toBeDefined();
+
+    const foundUser = await userService.findOneByEmail(createdUser.email);
+
+    expect(foundUser).toBeDefined();
+    expect(createdUser.email).toEqual(foundUser?.email);
+    expect(createdUser.name).toEqual(foundUser?.name);
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toBeDefined();
+    expect(usersOnDb).toHaveLength(1);
+  });
 });
