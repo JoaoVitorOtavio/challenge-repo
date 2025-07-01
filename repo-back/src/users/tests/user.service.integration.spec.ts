@@ -355,4 +355,12 @@ describe('UserService - integration', () => {
     expect(usersOnDb).toBeDefined();
     expect(usersOnDb).toHaveLength(1);
   });
+
+  it('Should return NotFoundExpection when a user is not found on find One', async () => {
+    await expectToThrow({
+      fn: () => userService.findOne(1),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+  });
 });
