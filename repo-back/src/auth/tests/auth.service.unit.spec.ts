@@ -6,8 +6,22 @@ import { UsersService } from 'src/users/users.service';
 import { Users } from 'src/users/users.entity';
 import { AuthController } from '../auth.controller';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from 'src/users/users.enums';
 
 let authService: AuthService;
+let usersService: UsersService;
+
+const MOCK_RESULT = {
+  id: 1,
+  name: 'mockedUser',
+  email: 'mockuser@mail.com',
+  password: '123',
+  role: UserRole.USER,
+};
+
+const mockUsersService = {
+  findOneByEmail: jest.fn(),
+};
 
 const mockUsersRepo = {
   find: jest.fn(),
@@ -19,6 +33,11 @@ const mockUsersRepo = {
   create: jest.fn(),
 } as Record<string, jest.Mock>;
 
+const mockJwtService = {
+  sign: jest.fn(),
+  verify: jest.fn(),
+};
+
 jest.mock('bcrypt');
 
 const mockBcrypt = {
@@ -26,6 +45,10 @@ const mockBcrypt = {
   genSalt: jest.fn(),
   hash: jest.fn(),
 };
+
+const MOCK_HASH_PASSWORD = 'hashedPassword';
+const MOCK_SALT = 'mockedSalt';
+const MOCK_JWT_SIGN_TOKEN = 'mocked-token';
 
 (bcrypt.compare as jest.Mock) = mockBcrypt.compare;
 (bcrypt.genSalt as jest.Mock) = mockBcrypt.genSalt;
@@ -36,17 +59,17 @@ beforeAll(async () => {
     controllers: [AuthController],
     providers: [
       AuthService,
-      UsersService,
+      {
+        provide: UsersService,
+        useValue: mockUsersService,
+      },
       {
         provide: getRepositoryToken(Users),
         useValue: mockUsersRepo,
       },
       {
         provide: JwtService,
-        useValue: {
-          sign: jest.fn(),
-          verify: jest.fn(),
-        },
+        useValue: mockJwtService,
       },
     ],
   }).compile();
@@ -61,5 +84,39 @@ beforeEach(() => {
 describe('AuthService', () => {
   it('Should be defined', () => {
     expect(authService).toBeDefined();
+  });
+
+  it('Should login successfully', async () => {
+    mockUsersService.findOneByEmail.mockResolvedValueOnce(MOCK_RESULT);
+    mockBcrypt.compare.mockResolvedValueOnce(true);
+    mockJwtService.sign.mockReturnValueOnce(MOCK_JWT_SIGN_TOKEN);
+
+    const result = await authService.login({
+      email: MOCK_RESULT.email,
+      password: MOCK_RESULT.password,
+    });
+
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('user');
+    expect(result).toHaveProperty('token');
+    expect(result.token).toBe(MOCK_JWT_SIGN_TOKEN);
+    expect(result.user).not.toHaveProperty('password');
+    expect(result.user).toMatchObject({
+      id: MOCK_RESULT.id,
+      name: MOCK_RESULT.name,
+      email: MOCK_RESULT.email,
+      role: MOCK_RESULT.role,
+    });
+
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
+      MOCK_RESULT.email,
+    );
+
+    expect(mockBcrypt.compare).toHaveBeenCalledTimes(1);
+    expect(mockBcrypt.compare).toHaveBeenCalledWith(
+      MOCK_RESULT.password,
+      MOCK_RESULT.password,
+    );
   });
 });
