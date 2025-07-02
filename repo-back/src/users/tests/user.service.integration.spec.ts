@@ -397,4 +397,12 @@ describe('UserService - integration', () => {
     expect(usersOnDb).toBeDefined();
     expect(usersOnDb).toHaveLength(0);
   });
+
+  it('Should return NotFoundException when user is not found on remove', async () => {
+    await expectToThrow({
+      fn: () => userService.remove(1),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+  });
 });
