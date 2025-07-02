@@ -386,4 +386,15 @@ describe('UserService - integration', () => {
       expectedMessage: 'Usuário não encontrado',
     });
   });
+
+  it('Should remove an user', async () => {
+    const createdUser = await createUser(userService);
+    expect(createdUser).toBeDefined();
+
+    await userService.remove(createdUser.id);
+
+    const usersOnDb = await userRepository.find();
+    expect(usersOnDb).toBeDefined();
+    expect(usersOnDb).toHaveLength(0);
+  });
 });
