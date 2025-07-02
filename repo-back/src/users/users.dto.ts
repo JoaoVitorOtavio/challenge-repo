@@ -37,25 +37,25 @@ export class UserDTO {
 export class updateUserDTO {
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
 
   @IsEmail(
     {},
     { message: 'E-mail inválido. Informe um endereço de e-mail válido.' },
   )
   @IsOptional()
-  email: string;
+  email?: string;
 
   @IsString()
   @IsOptional()
   @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres' })
-  password: string;
+  password?: string;
 
   @IsEnum(UserRole, {
     message: 'Invalid type on role',
   })
   @IsOptional() // é opicional pq tem default pra cadastrar no banco
-  role: UserRole;
+  role?: UserRole;
 }
 
 export class UpdateUserPasswordDTO {
@@ -88,5 +88,5 @@ export class createUserDTO {
     message: 'role deve ser admin, user ou internal',
   })
   @IsOptional() // é opicional pq tem default pra cadastrar no banco
-  role: UserRole;
+  role?: UserRole;
 }

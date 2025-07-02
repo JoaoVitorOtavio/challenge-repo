@@ -27,9 +27,7 @@ export class UsersService {
       const salt = await bcrypt.genSalt(saltRounds);
       const hashedPassword = await bcrypt.hash(data.password, salt);
 
-      data.password = hashedPassword;
-
-      const user = this.usersRepo.create(data);
+      const user = this.usersRepo.create({ ...data, password: hashedPassword });
       const result = await this.usersRepo.save(user);
 
       return result;
@@ -64,6 +62,12 @@ export class UsersService {
 
   async update(id: number, updateData: updateUserDTO): Promise<Partial<Users>> {
     try {
+      if (Object.keys(updateData).length === 0) {
+        throw new BadRequestException(
+          'É necessário informar ao menos um campo para atualizar.',
+        );
+      }
+
       const user: Users | null = await this.usersRepo.findOne({
         where: { id },
       });
@@ -112,13 +116,15 @@ export class UsersService {
         }
 
         if ('message' in err && typeof err.message === 'string') {
-          throw new BadRequestException(err.message || 'Erro ao criar usuário');
+          throw new BadRequestException(
+            err.message || 'Erro ao atualizar usuário',
+          );
         }
       }
 
       if (error instanceof Error) {
         throw new BadRequestException(
-          error?.message || 'Erro ao criar usuário',
+          error?.message || 'Erro ao atualizar usuário',
         );
       }
 
