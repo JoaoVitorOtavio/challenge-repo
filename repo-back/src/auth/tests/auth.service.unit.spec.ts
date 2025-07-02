@@ -7,6 +7,8 @@ import { Users } from 'src/users/users.entity';
 import { AuthController } from '../auth.controller';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from 'src/users/users.enums';
+import { expectToThrow } from 'src/helpers/test-exception';
+import { UnauthorizedException } from '@nestjs/common';
 
 let authService: AuthService;
 let usersService: UsersService;
@@ -118,5 +120,26 @@ describe('AuthService', () => {
       MOCK_RESULT.password,
       MOCK_RESULT.password,
     );
+  });
+
+  it('Should throw UnauthorizedException when user is not founded', async () => {
+    mockUsersService.findOneByEmail.mockResolvedValueOnce(null);
+
+    await expectToThrow({
+      fn: () =>
+        authService.login({
+          email: MOCK_RESULT.email,
+          password: MOCK_RESULT.password,
+        }),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Usuário não encontrado.',
+    });
+
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
+      MOCK_RESULT.email,
+    );
+
+    expect(mockBcrypt.compare).toHaveBeenCalledTimes(0);
   });
 });
