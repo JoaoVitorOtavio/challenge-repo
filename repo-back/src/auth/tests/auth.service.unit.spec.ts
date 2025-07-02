@@ -21,6 +21,14 @@ const MOCK_RESULT = {
   role: UserRole.USER,
 };
 
+const MOCK_USER = {
+  id: 1,
+  name: 'mockedUser',
+  email: 'mockuser@mail.com',
+  password: '123',
+  role: UserRole.USER,
+};
+
 const mockUsersService = {
   findOneByEmail: jest.fn(),
 };
@@ -94,8 +102,8 @@ describe('AuthService', () => {
     mockJwtService.sign.mockReturnValueOnce(MOCK_JWT_SIGN_TOKEN);
 
     const result = await authService.login({
-      email: MOCK_RESULT.email,
-      password: MOCK_RESULT.password,
+      email: MOCK_USER.email,
+      password: MOCK_USER.password,
     });
 
     expect(result).toBeDefined();
@@ -112,12 +120,12 @@ describe('AuthService', () => {
 
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
-      MOCK_RESULT.email,
+      MOCK_USER.email,
     );
 
     expect(mockBcrypt.compare).toHaveBeenCalledTimes(1);
     expect(mockBcrypt.compare).toHaveBeenCalledWith(
-      MOCK_RESULT.password,
+      MOCK_USER.password,
       MOCK_RESULT.password,
     );
   });
@@ -128,8 +136,8 @@ describe('AuthService', () => {
     await expectToThrow({
       fn: () =>
         authService.login({
-          email: MOCK_RESULT.email,
-          password: MOCK_RESULT.password,
+          email: MOCK_USER.email,
+          password: MOCK_USER.password,
         }),
       expectedException: UnauthorizedException,
       expectedMessage: 'Usuário não encontrado.',
@@ -137,9 +145,32 @@ describe('AuthService', () => {
 
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
-      MOCK_RESULT.email,
+      MOCK_USER.email,
     );
 
     expect(mockBcrypt.compare).toHaveBeenCalledTimes(0);
+  });
+
+  it('Should throw UnauthorizedException when password is not correctly', async () => {
+    mockUsersService.findOneByEmail.mockResolvedValueOnce(MOCK_RESULT);
+    mockBcrypt.compare.mockResolvedValueOnce(false);
+
+    await expectToThrow({
+      fn: () =>
+        authService.login({
+          email: MOCK_USER.email,
+          password: MOCK_USER.password,
+        }),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Senha incorreta.',
+    });
+
+    expect(mockBcrypt.compare).toHaveBeenCalledTimes(1);
+    expect(mockBcrypt.compare).toHaveBeenCalledWith(
+      MOCK_USER.password,
+      MOCK_RESULT.password,
+    );
+
+    expect(mockJwtService.sign).toHaveBeenCalledTimes(0);
   });
 });
