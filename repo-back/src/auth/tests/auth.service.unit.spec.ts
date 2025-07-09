@@ -151,7 +151,7 @@ describe('AuthService', () => {
     expect(mockBcrypt.compare).toHaveBeenCalledTimes(0);
   });
 
-  it('Should throw UnauthorizedException when password is not correctly', async () => {
+  it('Should throw UnauthorizedException when password is not correctly on Login', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(MOCK_RESULT);
     mockBcrypt.compare.mockResolvedValueOnce(false);
 
