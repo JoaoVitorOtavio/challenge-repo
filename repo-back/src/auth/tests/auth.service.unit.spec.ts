@@ -130,7 +130,7 @@ describe('AuthService', () => {
     );
   });
 
-  it('Should throw UnauthorizedException when user is not founded', async () => {
+  it('Should throw UnauthorizedException when user is not founded on Login', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(null);
 
     await expectToThrow({
