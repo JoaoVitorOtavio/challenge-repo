@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -40,8 +41,8 @@ export class AuthService {
         token: this.jwtService.sign(result, { expiresIn: '1h' }),
       };
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error?.message || 'Erro ao fazer login');
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new UnauthorizedException('Erro ao fazer login');
