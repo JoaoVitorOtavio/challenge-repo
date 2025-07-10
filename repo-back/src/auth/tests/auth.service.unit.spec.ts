@@ -200,4 +200,17 @@ describe('AuthService', () => {
       MOCK_RESULT.email,
     );
   });
+
+  it('Should throw UnauthorizedException when the token is invalid on loginWithJwt', async () => {
+    mockJwtService.verify.mockReturnValue(undefined);
+
+    await expectToThrow({
+      fn: () => authService.loginWithJwt(MOCK_JWT_CODE),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Token inválido',
+    });
+
+    expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
+    expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
+  });
 });
