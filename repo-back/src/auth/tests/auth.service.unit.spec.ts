@@ -11,7 +11,6 @@ import { expectToThrow } from 'src/helpers/test-exception';
 import { UnauthorizedException } from '@nestjs/common';
 
 let authService: AuthService;
-let usersService: UsersService;
 
 const MOCK_RESULT = {
   id: 1,
@@ -56,8 +55,6 @@ const mockBcrypt = {
   hash: jest.fn(),
 };
 
-const MOCK_HASH_PASSWORD = 'hashedPassword';
-const MOCK_SALT = 'mockedSalt';
 const MOCK_JWT_SIGN_TOKEN = 'mocked-token';
 const MOCK_JWT_CODE = 'JWTCODE';
 
