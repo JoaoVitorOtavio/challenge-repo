@@ -213,4 +213,23 @@ describe('AuthService', () => {
     expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
     expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
   });
+
+  it('Should throw UnauthorizedException when user is not founded on loginWithJwt', async () => {
+    mockUsersService.findOneByEmail.mockResolvedValueOnce(undefined);
+    mockJwtService.verify.mockReturnValue(MOCK_RESULT);
+
+    await expectToThrow({
+      fn: () => authService.loginWithJwt(MOCK_JWT_CODE),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+
+    expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
+    expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
+
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
+      MOCK_RESULT.email,
+    );
+  });
 });
