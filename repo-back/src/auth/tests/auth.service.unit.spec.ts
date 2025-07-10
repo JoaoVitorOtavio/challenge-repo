@@ -8,7 +8,7 @@ import { AuthController } from '../auth.controller';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from 'src/users/users.enums';
 import { expectToThrow } from 'src/helpers/test-exception';
-import { UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 let authService: AuthService;
 
@@ -128,7 +128,7 @@ describe('AuthService', () => {
     );
   });
 
-  it('Should throw UnauthorizedException when user is not founded on Login', async () => {
+  it('Should throw NotFoundException when user is not founded on Login', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(null);
 
     await expectToThrow({
@@ -137,7 +137,7 @@ describe('AuthService', () => {
           email: MOCK_USER.email,
           password: MOCK_USER.password,
         }),
-      expectedException: UnauthorizedException,
+      expectedException: NotFoundException,
       expectedMessage: 'Usuário não encontrado.',
     });
 
@@ -211,13 +211,13 @@ describe('AuthService', () => {
     expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
   });
 
-  it('Should throw UnauthorizedException when user is not founded on loginWithJwt', async () => {
+  it('Should throw NotFoundException when user is not founded on loginWithJwt', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(undefined);
     mockJwtService.verify.mockReturnValue(MOCK_RESULT);
 
     await expectToThrow({
       fn: () => authService.loginWithJwt(MOCK_JWT_CODE),
-      expectedException: UnauthorizedException,
+      expectedException: NotFoundException,
       expectedMessage: 'Usuário não encontrado',
     });
 
