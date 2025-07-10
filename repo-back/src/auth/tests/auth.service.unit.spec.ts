@@ -59,6 +59,7 @@ const mockBcrypt = {
 const MOCK_HASH_PASSWORD = 'hashedPassword';
 const MOCK_SALT = 'mockedSalt';
 const MOCK_JWT_SIGN_TOKEN = 'mocked-token';
+const MOCK_JWT_CODE = 'JWTCODE';
 
 (bcrypt.compare as jest.Mock) = mockBcrypt.compare;
 (bcrypt.genSalt as jest.Mock) = mockBcrypt.genSalt;
@@ -172,5 +173,31 @@ describe('AuthService', () => {
     );
 
     expect(mockJwtService.sign).toHaveBeenCalledTimes(0);
+  });
+
+  it('Should login with JWT successfully', async () => {
+    mockUsersService.findOneByEmail.mockResolvedValueOnce(MOCK_RESULT);
+    mockJwtService.verify.mockReturnValue(MOCK_RESULT);
+    mockJwtService.sign.mockReturnValue(MOCK_JWT_CODE);
+
+    const { password: _, ...mockWithoutPassword } = MOCK_RESULT;
+
+    const result = await authService.loginWithJwt(MOCK_JWT_CODE);
+
+    expect(result).toBeDefined();
+    expect(result.user).toBeDefined();
+    expect(result.token).toBeDefined();
+    expect(result.user.password).not.toBeDefined();
+
+    expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
+    expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
+
+    expect(mockJwtService.sign).toHaveBeenCalledTimes(1);
+    expect(mockJwtService.sign).toHaveBeenCalledWith(mockWithoutPassword);
+
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
+      MOCK_RESULT.email,
+    );
   });
 });
