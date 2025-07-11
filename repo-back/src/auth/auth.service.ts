@@ -74,7 +74,7 @@ export class AuthService {
       // Opcional: emitir novo token se quiser renovar
       return {
         user: result,
-        token: this.jwtService.sign(result),
+        token: token,
       };
     } catch (error: any) {
       if (error instanceof HttpException) {
