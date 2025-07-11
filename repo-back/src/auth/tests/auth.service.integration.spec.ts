@@ -191,4 +191,23 @@ describe('AuthService - integration', () => {
       expectedMessage: 'Token inválido ou expirado',
     });
   });
+
+  it('Should throw NotFoundException when user is not founded on loginWithJwt', async () => {
+    const { createdUser, mockedPassword } = await createAndCompareUserInfo();
+
+    const loginResult = await authService.login({
+      email: createdUser.email,
+      password: mockedPassword,
+    });
+
+    const jwtToken = loginResult.token;
+
+    await userRepository.delete({ id: createdUser.id });
+
+    await expectToThrow({
+      fn: () => authService.loginWithJwt(jwtToken),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
+  });
 });
