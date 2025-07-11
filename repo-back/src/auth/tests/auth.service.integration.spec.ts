@@ -145,4 +145,20 @@ describe('AuthService - integration', () => {
       expectedMessage: 'Senha incorreta.',
     });
   });
+
+  it('Should throw generic UnauthorizedException on unexpected error', async () => {
+    jest.spyOn(userService, 'findOneByEmail').mockImplementationOnce(() => {
+      throw new Error('Erro inesperado');
+    });
+
+    await expectToThrow({
+      fn: () =>
+        authService.login({
+          email: 'qualquer@email.com',
+          password: 'qualquer',
+        }),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Erro ao fazer login',
+    });
+  });
 });
