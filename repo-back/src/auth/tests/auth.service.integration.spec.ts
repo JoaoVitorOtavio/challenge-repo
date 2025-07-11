@@ -210,4 +210,19 @@ describe('AuthService - integration', () => {
       expectedMessage: 'Usuário não encontrado',
     });
   });
+
+  it('Should throw UnauthorizedException when token is expired', async () => {
+    const { createdUser } = await createAndCompareUserInfo();
+
+    const expiredToken = jwtService.sign(
+      { email: createdUser.email, id: createdUser.id },
+      { expiresIn: -10 },
+    );
+
+    await expectToThrow({
+      fn: () => authService.loginWithJwt(expiredToken),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Token inválido ou expirado',
+    });
+  });
 });
