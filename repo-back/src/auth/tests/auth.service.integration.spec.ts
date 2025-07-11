@@ -161,4 +161,26 @@ describe('AuthService - integration', () => {
       expectedMessage: 'Erro ao fazer login',
     });
   });
+
+  it('Should loginWithJwt successfully', async () => {
+    const { createdUser, mockedPassword } = await createAndCompareUserInfo();
+
+    const loginResult = await authService.login({
+      email: createdUser.email,
+      password: mockedPassword,
+    });
+
+    const result = await authService.loginWithJwt(loginResult.token);
+
+    expect(result).toBeDefined();
+    expect(result.token).toBeDefined();
+    expect(result.user).toBeDefined();
+    expect(result.user.password).not.toBeDefined();
+
+    expect(createdUser.id).toEqual(result.user.id);
+    expect(createdUser.email).toEqual(result.user.email);
+    expect(createdUser.name).toEqual(result.user.name);
+
+    expect(loginResult.token).toEqual(result.token);
+  });
 });
