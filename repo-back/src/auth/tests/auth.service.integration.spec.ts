@@ -2,7 +2,7 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { expectToThrow } from 'src/helpers/test-exception';
 import { AuthService } from '../auth.service';
 import { Users } from 'src/users/users.entity';
@@ -129,6 +129,20 @@ describe('AuthService - integration', () => {
         }),
       expectedException: NotFoundException,
       expectedMessage: 'Usuário não encontrado',
+    });
+  });
+
+  it('Should throw UnauthorizedException when password is incorrect on login', async () => {
+    const { createdUser } = await createAndCompareUserInfo();
+
+    await expectToThrow({
+      fn: () =>
+        authService.login({
+          email: createdUser.email,
+          password: 'wrongpassword',
+        }),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Senha incorreta.',
     });
   });
 });
