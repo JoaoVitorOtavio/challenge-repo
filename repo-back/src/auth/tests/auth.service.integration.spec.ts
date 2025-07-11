@@ -183,4 +183,12 @@ describe('AuthService - integration', () => {
 
     expect(loginResult.token).toEqual(result.token);
   });
+
+  it('Should throw UnauthorizedException when token is invalid on loginWithJwt', async () => {
+    await expectToThrow({
+      fn: () => authService.loginWithJwt('invalidToken'),
+      expectedException: UnauthorizedException,
+      expectedMessage: 'Token inválido ou expirado',
+    });
+  });
 });
