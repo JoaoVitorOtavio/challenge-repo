@@ -2,14 +2,12 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { expectToThrow } from 'src/helpers/test-exception';
-import { createUser } from 'src/helpers/test-create-user';
 import { AuthService } from '../auth.service';
 import { Users } from 'src/users/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { UsersModule } from 'src/users/users.module';
-import { UserRole } from 'src/users/users.enums';
 import { MOCK_CREATE_USER_DTO } from 'src/users/tests/user.service.integration.spec';
 import { AuthModule } from '../auth.module';
 import { JwtService } from '@nestjs/jwt';
@@ -117,5 +115,20 @@ describe('AuthService - integration', () => {
     const decoded: JwtPayload = jwtService.verify(loginResult.token);
     expect(decoded.email).toEqual(createdUser.email);
     expect(decoded.id).toEqual(createdUser.id);
+  });
+
+  it('Should throw NotFoundException when user is not founded on login', async () => {
+    const users = await userRepository.find();
+    expect(users).toHaveLength(0);
+
+    await expectToThrow({
+      fn: () =>
+        authService.login({
+          email: 'fakeMockedUser@mail.com',
+          password: '123123',
+        }),
+      expectedException: NotFoundException,
+      expectedMessage: 'Usuário não encontrado',
+    });
   });
 });
