@@ -201,7 +201,7 @@ describe('AuthService', () => {
     await expectToThrow({
       fn: () => authService.loginWithJwt(MOCK_JWT_CODE),
       expectedException: UnauthorizedException,
-      expectedMessage: 'Token inválido',
+      expectedMessage: 'Token inválido ou expirado',
     });
 
     expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
