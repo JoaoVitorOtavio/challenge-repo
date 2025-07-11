@@ -58,9 +58,6 @@ export class AuthService {
       }
 
       const decoded: JwtPayload = this.jwtService.verify(token);
-      if (!decoded || !decoded.email) {
-        throw new UnauthorizedException('Token inválido');
-      }
 
       const userOnDb = await this.usersService.findOneByEmail(decoded.email);
 
