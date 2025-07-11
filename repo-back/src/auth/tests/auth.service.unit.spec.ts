@@ -177,8 +177,6 @@ describe('AuthService', () => {
     mockJwtService.verify.mockReturnValue(MOCK_RESULT);
     mockJwtService.sign.mockReturnValue(MOCK_JWT_CODE);
 
-    const { password: _, ...mockWithoutPassword } = MOCK_RESULT;
-
     const result = await authService.loginWithJwt(MOCK_JWT_CODE);
 
     expect(result).toBeDefined();
@@ -189,8 +187,7 @@ describe('AuthService', () => {
     expect(mockJwtService.verify).toHaveBeenCalledTimes(1);
     expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
 
-    expect(mockJwtService.sign).toHaveBeenCalledTimes(1);
-    expect(mockJwtService.sign).toHaveBeenCalledWith(mockWithoutPassword);
+    expect(mockJwtService.sign).toHaveBeenCalledTimes(0);
 
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledTimes(1);
     expect(mockUsersService.findOneByEmail).toHaveBeenCalledWith(
