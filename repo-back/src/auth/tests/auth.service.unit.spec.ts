@@ -128,7 +128,7 @@ describe('AuthService', () => {
     );
   });
 
-  it('Should throw NotFoundException when user is not founded on Login', async () => {
+  it('Should throw NotFoundException when user is not found on Login', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(null);
 
     await expectToThrow({
@@ -208,7 +208,7 @@ describe('AuthService', () => {
     expect(mockJwtService.verify).toHaveBeenCalledWith(MOCK_JWT_CODE);
   });
 
-  it('Should throw NotFoundException when user is not founded on loginWithJwt', async () => {
+  it('Should throw NotFoundException when user is not found on loginWithJwt', async () => {
     mockUsersService.findOneByEmail.mockResolvedValueOnce(undefined);
     mockJwtService.verify.mockReturnValue(MOCK_RESULT);
 

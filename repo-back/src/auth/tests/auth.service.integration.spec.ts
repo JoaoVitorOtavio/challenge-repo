@@ -117,7 +117,7 @@ describe('AuthService - integration', () => {
     expect(decoded.id).toEqual(createdUser.id);
   });
 
-  it('Should throw NotFoundException when user is not founded on login', async () => {
+  it('Should throw NotFoundException when user is not found on login', async () => {
     const users = await userRepository.find();
     expect(users).toHaveLength(0);
 
@@ -192,7 +192,7 @@ describe('AuthService - integration', () => {
     });
   });
 
-  it('Should throw NotFoundException when user is not founded on loginWithJwt', async () => {
+  it('Should throw NotFoundException when user is not found on loginWithJwt', async () => {
     const { createdUser, mockedPassword } = await createAndCompareUserInfo();
 
     const loginResult = await authService.login({
