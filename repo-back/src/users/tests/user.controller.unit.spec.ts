@@ -135,4 +135,20 @@ describe('UserController - Unit', () => {
       updateUserProps.data.currentPassword,
     );
   });
+
+  it('Should findAll SuccessFully', async () => {
+    const MOCK_FIND_ALL_RESULT = [
+      { id: 1, name: 'fake1', email: 'fake1@mail', role: UserRole.USER },
+      { id: 2, name: 'fake2', email: 'fake2@mail', role: UserRole.USER },
+      { id: 3, name: 'fake2', email: 'fake3@mail', role: UserRole.USER },
+    ];
+    mockUsersService.findAll.mockResolvedValueOnce(MOCK_FIND_ALL_RESULT);
+
+    const result = await userController.findAll();
+
+    expect(result).toBeDefined();
+    expect(result).toEqual(MOCK_FIND_ALL_RESULT);
+
+    expect(mockUsersService.findAll).toHaveBeenCalledTimes(1);
+  });
 });
