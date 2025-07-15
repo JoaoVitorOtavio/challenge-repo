@@ -113,4 +113,26 @@ describe('UserController - Unit', () => {
       updateUserProps.data,
     );
   });
+
+  it('Should updatePassword successfully', async () => {
+    const updateUserProps = {
+      id: 1,
+      data: { newPassword: 'teste', currentPassword: 'fake' },
+    };
+
+    mockUsersService.updatePassword.mockResolvedValueOnce(null);
+
+    const result = await userController.updatePassword(
+      updateUserProps.id,
+      updateUserProps.data,
+    );
+
+    expect(result).toBeUndefined();
+    expect(mockUsersService.updatePassword).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.updatePassword).toHaveBeenCalledWith(
+      updateUserProps.id,
+      updateUserProps.data.newPassword,
+      updateUserProps.data.currentPassword,
+    );
+  });
 });
