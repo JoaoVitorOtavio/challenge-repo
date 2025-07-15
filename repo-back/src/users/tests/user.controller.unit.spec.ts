@@ -78,12 +78,39 @@ describe('UserController - Unit', () => {
       role: UserRole.USER,
     };
 
-    mockUsersService.create.mockResolvedValue(MOCK_CREATE_USER_BODY);
+    mockUsersService.create.mockResolvedValueOnce(MOCK_CREATE_USER_BODY);
 
     const result = await userController.create(MOCK_CREATE_USER_BODY);
 
     expect(result).toEqual(MOCK_CREATE_USER_BODY);
     expect(mockUsersService.create).toHaveBeenCalledTimes(1);
     expect(mockUsersService.create).toHaveBeenCalledWith(MOCK_CREATE_USER_BODY);
+  });
+
+  it('Should update an user successfully', async () => {
+    const updateUserProps = {
+      id: 1,
+      data: { name: 'fake name', email: 'fake@mail.com' },
+    };
+
+    const MOCK_CREATE_USER_BODY = {
+      name: 'fake',
+      email: 'fake@mail',
+      role: UserRole.USER,
+    };
+
+    mockUsersService.update.mockResolvedValueOnce(MOCK_CREATE_USER_BODY);
+
+    const result = await userController.update(
+      updateUserProps.id,
+      updateUserProps.data,
+    );
+
+    expect(result).toEqual(MOCK_CREATE_USER_BODY);
+    expect(mockUsersService.update).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.update).toHaveBeenCalledWith(
+      updateUserProps.id,
+      updateUserProps.data,
+    );
   });
 });
