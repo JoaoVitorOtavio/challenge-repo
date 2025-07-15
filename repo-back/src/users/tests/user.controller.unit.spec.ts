@@ -151,4 +151,23 @@ describe('UserController - Unit', () => {
 
     expect(mockUsersService.findAll).toHaveBeenCalledTimes(1);
   });
+
+  it('Should findOne successfully', async () => {
+    const MOCK_FIND_ONE_USER_RESULT = {
+      id: 1,
+      name: 'fake1',
+      email: 'fake1@mail',
+      role: UserRole.USER,
+    };
+
+    mockUsersService.findOne.mockResolvedValueOnce(MOCK_FIND_ONE_USER_RESULT);
+
+    const result = await userController.findOne(1);
+
+    expect(result).toBeDefined();
+    expect(result).toEqual(MOCK_FIND_ONE_USER_RESULT);
+
+    expect(mockUsersService.findOne).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.findOne).toHaveBeenCalledWith(1);
+  });
 });
