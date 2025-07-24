@@ -1,6 +1,7 @@
 import {
-  BadRequestException,
+  HttpException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
@@ -20,7 +21,7 @@ export class AuthService {
       const userOnDb = await this.usersService.findOneByEmail(user.email);
 
       if (!userOnDb) {
-        throw new UnauthorizedException('Usuário não encontrado.');
+        throw new NotFoundException('Usuário não encontrado.');
       }
 
       const passwordMatch = await bcrypt.compare(
@@ -40,8 +41,8 @@ export class AuthService {
         token: this.jwtService.sign(result, { expiresIn: '1h' }),
       };
     } catch (error: any) {
-      if (error instanceof Error) {
-        throw new BadRequestException(error?.message || 'Erro ao fazer login');
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new UnauthorizedException('Erro ao fazer login');
@@ -58,14 +59,10 @@ export class AuthService {
 
       const decoded: JwtPayload = this.jwtService.verify(token);
 
-      if (!decoded || !decoded.email) {
-        throw new UnauthorizedException('Token inválido');
-      }
-
       const userOnDb = await this.usersService.findOneByEmail(decoded.email);
 
       if (!userOnDb) {
-        throw new UnauthorizedException('Usuário não encontrado');
+        throw new NotFoundException('Usuário não encontrado');
       }
 
       const result: Partial<UserDTO> = { ...userOnDb };
@@ -74,17 +71,11 @@ export class AuthService {
       // Opcional: emitir novo token se quiser renovar
       return {
         user: result,
-        token: this.jwtService.sign(result),
+        token: token,
       };
     } catch (error: any) {
-      if (error instanceof Error) {
-        if (error.message === 'invalid signature') {
-          throw new UnauthorizedException('Token inválido!');
-        }
-
-        throw new UnauthorizedException(
-          error?.message || 'Token inválido ou expirado',
-        );
+      if (error instanceof HttpException) {
+        throw error;
       }
 
       throw new UnauthorizedException('Token inválido ou expirado');
